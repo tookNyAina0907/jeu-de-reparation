@@ -1,0 +1,132 @@
+/* For information on how to create your own theme, please refer to:
+http://ionicframework.com/docs/theming/ */
+
+/** Ionic CSS Variables **/
+:root {
+  /** primary **/
+  --ion-color-primary: #ff5e00;
+  --ion-color-primary-rgb: 255, 94, 0;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #e05300;
+  --ion-color-primary-tint: #ff6e1a;
+
+  /** secondary **/
+  --ion-color-secondary: #0f172a;
+  --ion-color-secondary-rgb: 15, 23, 42;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #0d1425;
+  --ion-color-secondary-tint: #272e3f;
+
+  /** tertiary **/
+  --ion-color-tertiary: #5260ff;
+  --ion-color-tertiary-rgb: 82, 96, 255;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #4854e0;
+  --ion-color-tertiary-tint: #6370ff;
+
+  /** success **/
+  --ion-color-success: #2dd36f;
+  --ion-color-success-rgb: 45, 211, 111;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #28ba62;
+  --ion-color-success-tint: #42d77d;
+
+  /** warning **/
+  --ion-color-warning: #ffc409;
+  --ion-color-warning-rgb: 255, 196, 9;
+  --ion-color-warning-contrast: #000000;
+  --ion-color-warning-contrast-rgb: 0, 0, 0;
+  --ion-color-warning-shade: #e0ad08;
+  --ion-color-warning-tint: #ffca22;
+
+  /** danger **/
+  --ion-color-danger: #eb445a;
+  --ion-color-danger-rgb: 235, 68, 90;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #cf3c4f;
+  --ion-color-danger-tint: #ed576b;
+
+  /** dark **/
+  --ion-color-dark: #222428;
+  --ion-color-dark-rgb: 34, 36, 40;
+  --ion-color-dark-contrast: #ffffff;
+  --ion-color-dark-contrast-rgb: 255, 255, 255;
+  --ion-color-dark-shade: #1e2023;
+  --ion-color-dark-tint: #383a3e;
+
+  /** medium **/
+  --ion-color-medium: #92949c;
+  --ion-color-medium-rgb: 146, 148, 156;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #808289;
+  --ion-color-medium-tint: #9d9fa6;
+
+  /** light **/
+  --ion-color-light: #f4f5f8;
+  --ion-color-light-rgb: 244, 245, 248;
+  --ion-color-light-contrast: #000000;
+  --ion-color-light-contrast-rgb: 0, 0, 0;
+  --ion-color-light-shade: #d7d8da;
+  --ion-color-light-tint: #f5f6f9;
+
+  /* Custom Garage Theme Variables */
+  --garage-bg: #0b0e14;
+  --garage-card-bg: rgba(30, 41, 59, 0.7);
+  --garage-orange: #ff5e00;
+  --garage-border: rgba(255, 94, 0, 0.5);
+}
+
+/* Force Dark Mode always */
+body {
+  --ion-background-color: var(--garage-bg);
+  --ion-background-color-rgb: 11, 14, 20;
+
+  --ion-text-color: #ffffff;
+  --ion-text-color-rgb: 255, 255, 255;
+
+  --ion-color-step-50: #0f1218;
+  --ion-color-step-100: #14171d;
+  --ion-color-step-150: #181c22;
+  --ion-color-step-200: #1d2127;
+  --ion-color-step-250: #21252b;
+  --ion-color-step-300: #262a30;
+  --ion-color-step-350: #2a2f35;
+  --ion-color-step-400: #2f343a;
+  --ion-color-step-450: #33393f;
+  --ion-color-step-500: #383e44;
+  --ion-color-step-550: #3c4248;
+  --ion-color-step-600: #41474d;
+  --ion-color-step-650: #454c52;
+  --ion-color-step-700: #4a5157;
+  --ion-color-step-750: #4e555c;
+  --ion-color-step-800: #535a61;
+  --ion-color-step-850: #575f66;
+  --ion-color-step-900: #5c646b;
+  --ion-color-step-950: #606870;
+
+  --ion-toolbar-background: var(--garage-bg);
+  --ion-toolbar-color: var(--garage-orange);
+  --ion-item-background: transparent;
+}
+
+.garage-card {
+  background: var(--garage-card-bg);
+  border: 1px solid var(--garage-border);
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(255, 94, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.garage-title {
+  color: var(--garage-orange);
+  font-family: 'Orbitron', sans-serif; /* Fallback to sans-serif if not loaded */
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: bold;
+}

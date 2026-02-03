@@ -1,0 +1,223 @@
+@use '../../styles/variables' as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba($orange, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba($orange, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+}
+
+.scanline {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    transparent 0%,
+    rgba($orange, 0.02) 50%,
+    transparent 100%
+  );
+  background-size: 100% 8px;
+  animation: scan 4s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 120px 40px $black;
+  pointer-events: none;
+}
+
+.hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  max-width: 640px;
+}
+
+.badge {
+  display: inline-block;
+  font-family: $font-display;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: $orange;
+  border: 1px solid $orange;
+  padding: 0.35rem 0.75rem;
+  margin-bottom: 1.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 10px rgba($orange, 0.3); }
+  50% { opacity: 0.8; box-shadow: 0 0 20px rgba($orange, 0.5); }
+}
+
+.title {
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  font-weight: 900;
+  line-height: 1.05;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.5rem;
+}
+
+.titleLine1 {
+  display: block;
+  color: $text;
+  text-shadow: 0 0 30px rgba($orange, 0.5);
+}
+
+.titleLine2 {
+  display: block;
+  color: $orange;
+  text-shadow: 0 0 40px $orange, 0 0 80px rgba($orange, 0.5);
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from { filter: brightness(1); }
+  to { filter: brightness(1.2); }
+}
+
+.tagline {
+  font-size: 1.1rem;
+  color: $text-dim;
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+}
+
+.gauges {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 2.5rem;
+}
+
+.gauge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 140px;
+
+  span {
+    font-size: 0.8rem;
+    color: $text-dim;
+    text-transform: uppercase;
+  }
+}
+
+.gaugeBar {
+  width: 100%;
+  height: 6px;
+  background: $gray-mid;
+  border-radius: 999px;
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    display: block;
+    height: 100%;
+    width: var(--val, 0%);
+    background: linear-gradient(90deg, $orange, $orange-bright);
+    border-radius: 999px;
+    animation: fillBar 1.5s ease-out forwards;
+    box-shadow: 0 0 10px $orange;
+  }
+}
+
+@keyframes fillBar {
+  from { width: 0; }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.cta {
+  min-width: 200px;
+}
+
+.corner {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border-color: $orange;
+  border-style: solid;
+  border-width: 0;
+  opacity: 0.6;
+
+  &[data-corner='tl'] {
+    top: 1rem;
+    left: 1rem;
+    border-top-width: 2px;
+    border-left-width: 2px;
+  }
+  &[data-corner='tr'] {
+    top: 1rem;
+    right: 1rem;
+    border-top-width: 2px;
+    border-right-width: 2px;
+  }
+  &[data-corner='bl'] {
+    bottom: 1rem;
+    left: 1rem;
+    border-bottom-width: 2px;
+    border-left-width: 2px;
+  }
+  &[data-corner='br'] {
+    bottom: 1rem;
+    right: 1rem;
+    border-bottom-width: 2px;
+    border-right-width: 2px;
+  }
+}
+
+.hudStatus {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: $font-display;
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  color: $text-dim;
+}
+
+.statusDot {
+  width: 8px;
+  height: 8px;
+  background: $orange;
+  border-radius: 50%;
+  animation: blink 1.5s ease-in-out infinite;
+  box-shadow: 0 0 10px $orange;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}

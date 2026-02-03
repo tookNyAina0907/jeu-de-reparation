@@ -1,0 +1,165 @@
+@use '../../styles/variables' as *;
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba($orange, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba($orange, 0.04) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+}
+
+.scanline {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    transparent 0%,
+    rgba($orange, 0.02) 50%,
+    transparent 100%
+  );
+  background-size: 100% 6px;
+  animation: scan 5s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+.corner {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border-color: $orange;
+  border-style: solid;
+  border-width: 0;
+  opacity: 0.5;
+
+  &[data-corner='tl'] { top: 1rem; left: 1rem; border-top-width: 2px; border-left-width: 2px; }
+  &[data-corner='tr'] { top: 1rem; right: 1rem; border-top-width: 2px; border-right-width: 2px; }
+  &[data-corner='bl'] { bottom: 1rem; left: 1rem; border-bottom-width: 2px; border-left-width: 2px; }
+  &[data-corner='br'] { bottom: 1rem; right: 1rem; border-bottom-width: 2px; border-right-width: 2px; }
+}
+
+.console {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 420px;
+  background: linear-gradient(160deg, rgba($gray-dark, 0.95) 0%, rgba($gray-mid, 0.8) 100%);
+  border: 2px solid $orange;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 0 40px rgba($orange, 0.25), inset 0 0 30px rgba($black, 0.5);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.badge {
+  font-family: $font-display;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: $orange;
+}
+
+.status {
+  font-family: $font-display;
+  font-size: 0.65rem;
+  color: $text-dim;
+  letter-spacing: 0.1em;
+}
+
+.title {
+  font-size: 1.5rem;
+  color: $text;
+  margin-bottom: 0.35rem;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: $text-dim;
+  margin-bottom: 1.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: $text-dim;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.input {
+  padding: 0.75rem 1rem;
+  background: $black;
+  border: 1px solid $gray-light;
+  border-radius: $radius;
+  color: $text;
+  transition: border-color $transition, box-shadow $transition;
+
+  &::placeholder {
+    color: $gray-lighter;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $orange;
+    box-shadow: 0 0 12px rgba($orange, 0.25);
+  }
+}
+
+.error {
+  color: $red;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+  background: rgba($red, 0.1);
+  border-radius: $radius;
+  border: 1px solid rgba($red, 0.3);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.hint {
+  margin-top: 1.25rem;
+  font-size: 0.8rem;
+  color: $gray-lighter;
+  text-align: center;
+
+  code {
+    background: rgba($gray-mid, 0.8);
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    color: $orange;
+  }
+}
