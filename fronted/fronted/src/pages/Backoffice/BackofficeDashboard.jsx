@@ -55,7 +55,13 @@ export function BackofficeDashboard() {
       navigate('/backoffice');
       return;
     }
-    setUser(JSON.parse(u));
+    const parsedUser = JSON.parse(u);
+    if (parsedUser.role !== 'admin') {
+      localStorage.removeItem('garage_user'); // Sécurité : on déconnecte si pas admin
+      navigate('/backoffice');
+      return;
+    }
+    setUser(parsedUser);
   }, [navigate]);
 
   useEffect(() => {

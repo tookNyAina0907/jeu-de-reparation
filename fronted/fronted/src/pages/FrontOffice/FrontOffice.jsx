@@ -21,7 +21,7 @@ export function FrontOffice() {
 
   useEffect(() => {
     Promise.all([
-      getUsers().then((r) => setUsers(r.data)),
+      getUsers().then((r) => setUsers(r.data.filter(u => u.role === 'client'))),
       getClients().then((r) => setCarsList(r.data)),
       getRepairsInProgress().then((r) => setRepairs(r.data)),
       getWaitingSlot().then((r) => setWaiting(r.data)),

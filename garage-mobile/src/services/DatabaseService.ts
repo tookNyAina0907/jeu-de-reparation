@@ -36,6 +36,7 @@ export const DatabaseService = {
         if (existing) {
             throw new Error(`User with email ${user.email} already exists`);
         }
+        user.role = 'client'; // Default role
         const docRef = await addDoc(usersCol, user);
         return docRef.id;
     },

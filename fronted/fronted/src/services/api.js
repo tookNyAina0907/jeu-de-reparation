@@ -16,17 +16,14 @@ import {
 
 /** Login via Firebase Auth */
 export async function login(email, password) {
-  // En attendant d'avoir des comptes réels, on peut aussi simuler si besoin,
-  // mais ici on utilise le service Firebase Auth.
   const res = await loginUser(email, password);
   if (res.ok) {
-    // On récupère les infos additionnelles dans t_users si nécessaire
-    // Pour l'instant on retourne l'objet user de Firebase
     return {
       ok: true,
       user: {
-        name: res.user.displayName || res.user.email,
-        login: res.user.email
+        name: res.user.nom || res.user.displayName || res.user.email,
+        login: res.user.email,
+        role: res.user.role
       }
     };
   }
@@ -61,17 +58,20 @@ export async function getClients() {
   const users = await userService.getAll();
   const voitures = await voitureService.getAll();
 
-  // On retourne la liste de TOUTES les voitures avec le nom du propriétaire
-  const vehicles = voitures.map(v => {
-    const u = users.find(user => user.id === v.users_id) || { nom: 'Inconnu' };
-    return {
-      id: v.id,
-      nom: u.nom,
-      plaque: v.matricule || 'N/A',
-      vehicule: 'Véhicule ' + (v.matricule || ''),
-      tel: u.contact || 'N/A'
-    };
-  });
+  // On retourne la liste des voitures des clients
+  const vehicles = voitures
+    .map(v => {
+      const u = users.find(user => user.id === v.users_id) || { nom: 'Inconnu', role: 'inconnu' };
+      if (u.role !== 'client') return null;
+      return {
+        id: v.id,
+        nom: u.nom,
+        plaque: v.matricule || 'N/A',
+        vehicule: 'Véhicule ' + (v.matricule || ''),
+        tel: u.contact || 'N/A'
+      };
+    })
+    .filter(v => v !== null);
 
   return { data: vehicles };
 }
@@ -171,7 +171,7 @@ export async function getStats() {
     return acc;
   }, 0);
 
-  const totalClients = users.length;
+  const totalClients = users.filter(u => u.role === 'client').length;
 
   return {
     data: {

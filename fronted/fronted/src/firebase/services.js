@@ -18,10 +18,48 @@ import { db, auth } from "./config";
 
 // --- SERVICES D'AUTHENTIFICATION ---
 
+export const userService = {
+    getAll: () => getAllDocuments("t_users"),
+    getById: (id) => getDocumentById("t_users", id),
+    getByEmail: async (email) => {
+        const q = query(collection(db, "t_users"), where("email", "==", email));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) return null;
+        const resultDoc = querySnapshot.docs[0];
+        return { id: resultDoc.id, ...resultDoc.data() };
+    },
+    create: (data) => addDocument("t_users", data),
+    update: (id, data) => updateDocument("t_users", id, data),
+    delete: (id) => deleteDocument("t_users", id),
+};
+
 export const loginUser = async (email, password) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        return { ok: true, user: userCredential.user };
+        const user = userCredential.user;
+
+        console.log("Firebase Auth réussi pour:", user.email);
+
+        // On essaye de récupérer les données par Email
+        let userDoc = await userService.getByEmail(email);
+
+        // Si non trouvé, on essaye par UID (ID du document = UID Firebase Auth)
+        if (!userDoc) {
+            console.log("Doc non trouvé par email, essai par UID:", user.uid);
+            userDoc = await userService.getById(user.uid);
+        }
+
+        console.log("Données Firestore récupérées:", userDoc);
+
+        return {
+            ok: true,
+            user: {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                ...(userDoc || {}) // On fusionne les données Firestore (nom, role, etc.)
+            }
+        };
     } catch (error) {
         console.error("Erreur de connexion:", error.message);
         return { ok: false, error: error.message };
@@ -49,17 +87,6 @@ export const registerUser = async (email, password) => {
 };
 
 // --- SERVICES SPECIFIQUES (Mappage SQL -> Firestore) ---
-
-/**
- * Gestion des Utilisateurs (t_users)
- */
-export const userService = {
-    getAll: () => getAllDocuments("t_users"),
-    getById: (id) => getDocumentById("t_users", id),
-    create: (data) => addDocument("t_users", data),
-    update: (id, data) => updateDocument("t_users", id, data),
-    delete: (id) => deleteDocument("t_users", id),
-};
 
 /**
  * Gestion des Voitures (t_voiture)
