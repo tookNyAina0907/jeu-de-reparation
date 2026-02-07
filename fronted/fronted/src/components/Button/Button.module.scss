@@ -1,0 +1,67 @@
+@use '../../styles/variables' as *;
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: $font-display;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: $radius;
+  transition: all $transition;
+  text-decoration: none;
+  border: 2px solid transparent;
+
+  &.md {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  &.lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+  }
+
+  &.primary {
+    background: linear-gradient(135deg, $orange 0%, $orange-dim 100%);
+    color: $black;
+    border-color: $orange-bright;
+    box-shadow: 0 0 20px rgba($orange, 0.4);
+
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, $orange-bright 0%, $orange 100%);
+      box-shadow: 0 0 30px rgba($orange, 0.6);
+      transform: translateY(-2px);
+    }
+  }
+
+  &.secondary {
+    background: transparent;
+    color: $orange;
+    border-color: $orange;
+
+    &:hover:not(:disabled) {
+      background: rgba($orange, 0.15);
+      box-shadow: 0 0 20px rgba($orange, 0.3);
+    }
+  }
+
+  &.ghost {
+    background: rgba($gray-mid, 0.5);
+    color: $text;
+    border-color: $gray-light;
+
+    &:hover:not(:disabled) {
+      background: rgba($gray-mid, 0.8);
+      border-color: $orange;
+      color: $orange;
+    }
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

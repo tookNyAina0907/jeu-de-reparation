@@ -1,0 +1,40 @@
+@use '../../styles/variables' as *;
+
+.wrapper {
+  width: 100%;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.label {
+  font-size: 0.9rem;
+  color: $text-dim;
+}
+
+.percent {
+  font-family: $font-display;
+  font-weight: 600;
+  color: $orange;
+  font-size: 0.9rem;
+}
+
+.track {
+  height: 10px;
+  background: $gray-mid;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid $gray-light;
+}
+
+.fill {
+  height: 100%;
+  background: linear-gradient(90deg, $orange-dim 0%, $orange 50%, $orange-bright 100%);
+  border-radius: 999px;
+  transition: width 0.5s ease;
+  box-shadow: 0 0 10px rgba($orange, 0.5);
+}
