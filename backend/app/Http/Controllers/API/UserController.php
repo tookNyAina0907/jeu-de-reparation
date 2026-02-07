@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+<<<<<<< HEAD
     // Fonction pour obtenir tous les utilisateurs avec leurs voitures et réparations
     public function index()
     {
@@ -26,4 +27,12 @@ class UserController extends Controller
 
         return response()->json($user, 200);
     }
+=======
+    // Fonction pour obtenir tous les utilisateurs
+    public function index()
+    {
+        $users = User::select('id', 'nom', 'email')->get();
+        return response()->json($users, 200);
+    }
+>>>>>>> d0fb118 (Update project)
 }

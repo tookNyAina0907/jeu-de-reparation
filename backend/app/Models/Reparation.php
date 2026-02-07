@@ -11,8 +11,11 @@ class Reparation extends Model
 
     protected $table = 't_reparations';
 
+<<<<<<< HEAD
     public $timestamps = false;
 
+=======
+>>>>>>> d0fb118 (Update project)
     protected $fillable = [
         'voiture_id',
         'type_id',
@@ -30,8 +33,13 @@ class Reparation extends Model
         return $this->belongsTo(TypeIntervention::class, 'type_id');
     }
 
+<<<<<<< HEAD
     // Relation avec le suivi des statuts
     public function reparationsStatuts()
+=======
+    // Relation avec les statuts (historique)
+    public function statuts()
+>>>>>>> d0fb118 (Update project)
     {
         return $this->hasMany(ReparationStatut::class, 'reparations_id');
     }

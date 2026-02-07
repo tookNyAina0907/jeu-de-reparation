@@ -50,6 +50,11 @@ export const DatabaseService = {
         return null;
     },
 
+    async getAllUsers(): Promise<User[]> {
+        const snapshot = await getDocs(usersCol);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+    },
+
     // --- Voitures ---
     async createVoiture(voiture: Voiture): Promise<string> {
         // Enforce Unique Matricule
@@ -111,6 +116,11 @@ export const DatabaseService = {
         const q = query(reparationsCol, where("voiture_id", "==", voitureId));
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reparation));
+    },
+
+    async getAllReparations(): Promise<Reparation[]> {
+        const snapshot = await getDocs(reparationsCol);
+        return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reparation));
     },
 
     // --- Reparations Statut (Suivi) ---

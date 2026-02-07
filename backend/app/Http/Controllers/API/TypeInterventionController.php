@@ -21,15 +21,23 @@ class TypeInterventionController extends Controller
         // Valider les données
         $request->validate([
             'nom' => 'required|string|max:255',
+<<<<<<< HEAD
             'description_interventions' => 'nullable|string|max:500',
             'prix' => 'required|numeric|min:0',
             'duree' => 'nullable|string', // Format HH:MM:SS
+=======
+            'prix' => 'required|numeric|min:0',
+            'duree' => 'required|integer|min:1',
+>>>>>>> d0fb118 (Update project)
         ]);
 
         // Créer l'intervention
         $intervention = TypeIntervention::create([
             'nom' => $request->nom,
+<<<<<<< HEAD
             'description_interventions' => $request->description_interventions,
+=======
+>>>>>>> d0fb118 (Update project)
             'prix' => $request->prix,
             'duree' => $request->duree,
         ]);
@@ -60,9 +68,14 @@ class TypeInterventionController extends Controller
         // Valider les données
         $request->validate([
             'nom' => 'sometimes|required|string|max:255',
+<<<<<<< HEAD
             'description_interventions' => 'nullable|string|max:500',
             'prix' => 'sometimes|required|numeric|min:0',
             'duree' => 'nullable|string',
+=======
+            'prix' => 'sometimes|required|numeric|min:0',
+            'duree' => 'sometimes|required|integer|min:1',
+>>>>>>> d0fb118 (Update project)
         ]);
 
         // Trouver l'intervention
@@ -75,7 +88,11 @@ class TypeInterventionController extends Controller
         }
 
         // Mettre à jour l'intervention
+<<<<<<< HEAD
         $intervention->update($request->only(['nom', 'description_interventions', 'prix', 'duree']));
+=======
+        $intervention->update($request->only(['nom', 'prix', 'duree']));
+>>>>>>> d0fb118 (Update project)
 
         return response()->json([
             'message' => 'Intervention modifiée avec succès',

@@ -11,8 +11,11 @@ class TypeIntervention extends Model
 
     protected $table = 't_type_interventions';
 
+<<<<<<< HEAD
     public $timestamps = false;
 
+=======
+>>>>>>> d0fb118 (Update project)
     protected $fillable = [
         'nom',
         'description_interventions',

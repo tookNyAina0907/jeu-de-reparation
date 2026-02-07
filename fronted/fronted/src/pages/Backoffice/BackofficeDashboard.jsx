@@ -201,35 +201,21 @@ export function BackofficeDashboard() {
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>
-          Réparations en cours
-          <span className={styles.badge}>
-            {repairs.length} / {MAX_REPAIRS}
-          </span>
+          Liste des Interventions
         </h2>
         <div className={styles.repairs}>
-          {repairs.length === 0 ? (
-            <Card className={styles.empty}>Aucune réparation en cours.</Card>
+          {types.length === 0 ? (
+            <Card className={styles.empty}>Aucun type d'intervention configuré.</Card>
           ) : (
-            repairs.map((r) => (
-              <Card key={r.id} variant="hud" className={styles.repairCard}>
+            types.map((t) => (
+              <Card key={t.id} variant="hud" className={styles.repairCard}>
                 <div className={styles.repairHeader}>
-                  <span className={styles.plaque}>{r.plaque}</span>
-                  <span className={styles.vehicule}>{r.vehicule}</span>
+                  <span className={styles.plaque}>{t.label}</span>
                 </div>
-                <p className={styles.client}>{r.clientName}</p>
+                <p className={styles.client}>{t.description}</p>
                 <p className={styles.intervention}>
-                  {r.intervention?.type} — {r.intervention?.price} € · {r.intervention?.duration} s
+                  {t.basePrice} € · {typeof t.baseDuration === 'number' ? (t.baseDuration / 60) + ' min' : t.baseDuration}
                 </p>
-                <ProgressBar
-                  value={r.progress}
-                  label="Avancement"
-                  showPercent={true}
-                  animated={true}
-                />
-                <div className={styles.status}>
-                  <span className={styles.statusDot} />
-                  {r.status === 'en_cours' ? 'En cours' : r.status}
-                </div>
               </Card>
             ))
           )}

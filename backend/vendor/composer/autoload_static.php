@@ -530,7 +530,10 @@ class ComposerStaticInitaa322c53454393ed775cfe4807d54a50
         'App\\Http\\Controllers\\API\\TypeInterventionController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/TypeInterventionController.php',
         'App\\Http\\Controllers\\API\\UserController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/UserController.php',
         'App\\Http\\Controllers\\API\\VoitureController' => __DIR__ . '/../..' . '/app/Http/Controllers/API/VoitureController.php',
+<<<<<<< HEAD
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
+=======
+>>>>>>> d0fb118 (Update project)
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Http\\Middleware\\Authenticate' => __DIR__ . '/../..' . '/app/Http/Middleware/Authenticate.php',
         'App\\Http\\Middleware\\EncryptCookies' => __DIR__ . '/../..' . '/app/Http/Middleware/EncryptCookies.php',

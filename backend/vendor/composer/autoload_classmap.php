@@ -13,7 +13,10 @@ return array(
     'App\\Http\\Controllers\\API\\TypeInterventionController' => $baseDir . '/app/Http/Controllers/API/TypeInterventionController.php',
     'App\\Http\\Controllers\\API\\UserController' => $baseDir . '/app/Http/Controllers/API/UserController.php',
     'App\\Http\\Controllers\\API\\VoitureController' => $baseDir . '/app/Http/Controllers/API/VoitureController.php',
+<<<<<<< HEAD
     'App\\Http\\Controllers\\Controller' => $baseDir . '/app/Http/Controllers/Controller.php',
+=======
+>>>>>>> d0fb118 (Update project)
     'App\\Http\\Kernel' => $baseDir . '/app/Http/Kernel.php',
     'App\\Http\\Middleware\\Authenticate' => $baseDir . '/app/Http/Middleware/Authenticate.php',
     'App\\Http\\Middleware\\EncryptCookies' => $baseDir . '/app/Http/Middleware/EncryptCookies.php',

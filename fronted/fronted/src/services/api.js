@@ -76,6 +76,12 @@ export async function getClients() {
   return { data: vehicles };
 }
 
+/** Liste des utilisateurs bruts (t_users) */
+export async function getUsers() {
+  const users = await userService.getAll();
+  return { data: users };
+}
+
 /** Réparations en cours — t_reparation */
 export async function getRepairsInProgress() {
   const reparations = await reparationService.getAll();
@@ -152,9 +158,19 @@ export async function getWaitingSlot() {
 export async function getStats() {
   const reparations = await reparationService.getAll();
   const users = await userService.getAll();
+  const types = await interventionTypeService.getAll();
 
   const repairsToday = reparations.length;
-  const revenueToday = reparations.reduce((acc, r) => acc + (r.prix || 0), 0);
+  // Calcul du revenu basé sur le prix du type d'intervention lié, UNIQUEMENT si Payé
+  const revenueToday = reparations.reduce((acc, r) => {
+    // Vérification sensible à la casse (Payé/payé)
+    if (r.statut_id === 'Payé' || r.statut_id === 'payé') {
+      const type = types.find(t => t.id === r.type_id);
+      return acc + (type && type.prix ? Number(type.prix) : 0);
+    }
+    return acc;
+  }, 0);
+
   const totalClients = users.length;
 
   return {
@@ -162,7 +178,7 @@ export async function getStats() {
       repairsToday,
       revenueToday,
       totalClients,
-      avgRepairTime: 45
+      avgRepairTime: 45 // Valeur simulée ou à calculer si les données le permettent
     }
   };
 }

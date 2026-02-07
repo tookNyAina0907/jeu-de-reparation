@@ -11,8 +11,11 @@ class Voiture extends Model
 
     protected $table = 't_voiture';
 
+<<<<<<< HEAD
     public $timestamps = false;
 
+=======
+>>>>>>> d0fb118 (Update project)
     protected $fillable = [
         'matricule',
         'users_id',

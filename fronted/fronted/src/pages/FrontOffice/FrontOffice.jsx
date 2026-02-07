@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getClients, getRepairsInProgress, getWaitingSlot, getInterventionTypes, createIntervention } from '../../services/api';
+import { getUsers, getClients, getRepairsInProgress, getWaitingSlot, getInterventionTypes, createIntervention } from '../../services/api';
 import { Card, CardHeader } from '../../components/Card/Card';
 import { Button } from '../../components/Button/Button';
 import { ProgressBar } from '../../components/ProgressBar/ProgressBar';
@@ -8,7 +8,8 @@ import styles from './FrontOffice.module.scss';
 const MAX_REPAIRS = 2;
 
 export function FrontOffice() {
-  const [clients, setClients] = useState([]);
+  const [users, setUsers] = useState([]); // Liste pour l'affichage "Utilisateurs"
+  const [carsList, setCarsList] = useState([]); // Liste pour le select "Véhicule"
   const [repairs, setRepairs] = useState([]);
   const [waiting, setWaiting] = useState([]);
   const [types, setTypes] = useState([]);
@@ -20,7 +21,8 @@ export function FrontOffice() {
 
   useEffect(() => {
     Promise.all([
-      getClients().then((r) => setClients(r.data)),
+      getUsers().then((r) => setUsers(r.data)),
+      getClients().then((r) => setCarsList(r.data)),
       getRepairsInProgress().then((r) => setRepairs(r.data)),
       getWaitingSlot().then((r) => setWaiting(r.data)),
       getInterventionTypes().then((r) => setTypes(r.data)),
@@ -103,7 +105,7 @@ export function FrontOffice() {
                 className={styles.select}
               >
                 <option value="">— Choisir Véhicule —</option>
-                {clients.map((c) => (
+                {carsList.map((c) => (
                   <option key={c.id} value={c.id}>{c.plaque} ({c.nom})</option>
                 ))}
               </select>
@@ -118,19 +120,22 @@ export function FrontOffice() {
         {message && <p className={styles.message}>{message}</p>}
       </section>
 
-      <section className={styles.section} id="clients">
-        <h2 className={styles.sectionTitle}>Clients</h2>
+      <section className={styles.section} id="users">
+        <h2 className={styles.sectionTitle}>Utilisateurs</h2>
         <div className={styles.clients}>
-          {clients.map((c) => (
-            <Card key={c.id} variant="hud" className={styles.clientCard}>
-              <div className={styles.clientHeader}>
-                <span className={styles.name}>{c.nom}</span>
-                <span className={styles.plaque}>{c.plaque}</span>
-              </div>
-              <p className={styles.vehicule}>{c.vehicule}</p>
-              <p className={styles.tel}>{c.tel}</p>
-            </Card>
-          ))}
+          {users.length === 0 ? (
+            <Card className={styles.empty}>Aucun utilisateur enregistré.</Card>
+          ) : (
+            users.map((u) => (
+              <Card key={u.id} variant="hud" className={styles.clientCard}>
+                <div className={styles.clientHeader}>
+                  <span className={styles.name}>{u.nom}</span>
+                </div>
+                <p className={styles.vehicule}>{u.email}</p>
+                <p className={styles.tel}>{u.contact || 'Pas de contact'}</p>
+              </Card>
+            ))
+          )}
         </div>
       </section>
 
