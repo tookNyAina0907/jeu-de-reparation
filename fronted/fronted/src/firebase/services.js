@@ -135,12 +135,37 @@ export const reparationService = {
         return reparation;
     },
     updateStatut: async (reparationId, newStatutId) => {
+        // 1. Mettre à jour le statut de la réparation
         await updateDocument("t_reparation", reparationId, { statut_id: newStatutId });
-        return await addDocument("t_reparations_statut", {
+        await addDocument("t_reparations_statut", {
             reparations_id: reparationId,
             statut_id: newStatutId,
             date_statut: new Date().toISOString()
         });
+
+        // 2. Si le statut est "Terminé", on vérifie si toutes les réparations de la voiture sont finies
+        if (newStatutId === "Terminé" || newStatutId === "terminé") {
+            const currentRep = await getDocumentById("t_reparation", reparationId);
+            if (currentRep && currentRep.voiture_id) {
+                const voitureId = currentRep.voiture_id;
+
+                // Récupérer toutes les réparations de cette voiture
+                const q = query(collection(db, "t_reparation"), where("voiture_id", "==", voitureId));
+                const snapshot = await getDocs(q);
+                const allReparations = snapshot.docs.map(doc => doc.data());
+
+                // Vérifier si elles sont toutes à "Terminé"
+                const allDone = allReparations.every(r => r.statut_id === "Terminé" || r.statut_id === "terminé" || r.statut_id === "Payé" || r.statut_id === "payé");
+
+                if (allDone) {
+                    // Mettre à jour la voiture pour la notification mobile
+                    await updateDocument("t_voiture", voitureId, { toutFini: true });
+                    console.log(`Toutes les réparations pour ${voitureId} sont finies. Flag toutFini activé.`);
+                }
+            }
+        }
+
+        return { ok: true };
     },
     getHistory: async (reparationId) => {
         const q = query(collection(db, "t_reparations_statut"), where("reparations_id", "==", reparationId));

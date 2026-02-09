@@ -11,10 +11,10 @@
     <ion-content class="ion-padding">
        <div class="payment-container" v-if="car">
          <h2>Facture</h2>
-         <p><strong>Véhicule:</strong> {{ car.model }}</p>
-         <p><strong>Immatriculation:</strong> {{ car.licensePlate }}</p>
+         <p><strong>Véhicule:</strong> {{ car.modele }}</p>
+         <p><strong>Immatriculation:</strong> {{ car.matricule }}</p>
          <div class="total-box">
-           <h1>{{ car.totalCost.toLocaleString() }} Ar</h1>
+           <h1>{{ totalCost.toLocaleString() }} Ar</h1>
          </div>
 
          <ion-list>
@@ -47,25 +47,61 @@
 import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonButton, IonList, IonListHeader, IonItem, IonLabel, IonRadioGroup, IonRadio } from '@ionic/vue';
 import { ref, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-import { GarageService, Car } from '@/services/MockGarageService';
+import { DatabaseService } from '@/services/DatabaseService';
+import type { Voiture } from '@/types/models';
 
 const route = useRoute();
 const router = useRouter();
-const car = ref<Car | undefined>(undefined);
+const car = ref<Voiture | null>(null);
+const totalCost = ref(0);
 const paymentMethod = ref('card');
 
 onMounted(async () => {
-    const id = Number(route.params.id);
-    car.value = await GarageService.getCarById(id);
+    const id = route.params.id as string;
+    const voiture = await DatabaseService.getVoitureById(id);
+    
+    if (voiture) {
+        car.value = voiture;
+        // Fetch repairs to calculate total cost
+        const repairs = await DatabaseService.getReparationsByVoiture(id);
+        const allTypes = await DatabaseService.getAllTypesIntervention();
+        
+        totalCost.value = repairs.reduce((acc, rep) => {
+            const type = allTypes.find(t => t.id === rep.type_id);
+            return acc + (type ? type.prix : 0);
+        }, 0);
+    }
 });
 
 const confirmPayment = async () => {
-    if (car.value) {
-        // Simulation API Call
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        await GarageService.pay(car.value.id);
-        alert('Paiement réussi !');
-        router.replace('/home');
+    if (car.value && car.value.id) {
+        try {
+            // 1. Update repairs status to "Payé"
+            const repairs = await DatabaseService.getReparationsByVoiture(car.value.id);
+            const statusPaid = await DatabaseService.getStatutByName('Payé');
+            
+            if (statusPaid) {
+                for (const rep of repairs) {
+                    // Update repair history
+                    await DatabaseService.addReparationStatut({
+                        reparation_id: rep.id!,
+                        statut_id: statusPaid.id!,
+                        date_statut: new Date()
+                    });
+                }
+            }
+
+            // 2. Clear flags on the car
+            await DatabaseService.updateVoiture(car.value.id, {
+                toutFini: false
+            });
+
+            alert('Paiement réussi !');
+            router.replace('/home');
+        } catch (e) {
+            console.error("Payment error:", e);
+            alert('Erreur lors du paiement.');
+        }
     }
 };
 </script>

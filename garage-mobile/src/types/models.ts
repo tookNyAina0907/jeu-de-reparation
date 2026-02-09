@@ -12,6 +12,7 @@ export interface Voiture {
     matricule: string;
     modele: string;
     users_id: string; // Reference to User ID
+    toutFini?: boolean;
 }
 
 export interface TypeIntervention {
