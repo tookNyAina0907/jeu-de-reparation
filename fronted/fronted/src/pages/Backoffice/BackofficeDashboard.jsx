@@ -6,6 +6,7 @@ import {
   getRepairsInProgress,
   createInterventionType,
   logout,
+  syncDatabase,
 } from '../../services/api';
 import { Button } from '../../components/Button/Button';
 import { Card, CardHeader } from '../../components/Card/Card';
@@ -79,6 +80,19 @@ export function BackofficeDashboard() {
     navigate('/backoffice');
   }
 
+  async function handleSync() {
+    try {
+      setLoading(true);
+      await syncDatabase();
+      alert('Synchronisation réussie !');
+    } catch (error) {
+      console.error('Erreur de synchronisation:', error);
+      alert('Erreur lors de la synchronisation.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function handleCatalogChange(e) {
     const { name, value } = e.target;
     setCatalogForm((f) => ({ ...f, [name]: value }));
@@ -108,6 +122,9 @@ export function BackofficeDashboard() {
         <h1 className={styles.title}>Dashboard</h1>
         <div className={styles.user}>
           <span>{user.name}</span>
+          <Button variant="secondary" size="md" onClick={handleSync} style={{ marginRight: '10px' }}>
+            Synchroniser
+          </Button>
           <Button variant="ghost" size="md" onClick={handleLogout}>
             Déconnexion
           </Button>

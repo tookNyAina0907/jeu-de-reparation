@@ -75,32 +75,47 @@ onMounted(async () => {
 
 const confirmPayment = async () => {
     if (car.value && car.value.id) {
+        // Simple loading indicator
+        const btn = document.querySelector('ion-button');
+        if (btn) btn.disabled = true;
+
         try {
             // 1. Update repairs status to "Payé"
             const repairs = await DatabaseService.getReparationsByVoiture(car.value.id);
-            const statusPaid = await DatabaseService.getStatutByName('Payé');
+            const statusPaidId = 'nAfHysS0kCpYjgLtoAy3'; // Hardcoded ID as per request
             
-            if (statusPaid) {
+            if (statusPaidId) {
                 for (const rep of repairs) {
+                    // Update main document
+                    await DatabaseService.updateReparation(rep.id!, { statut_id: statusPaidId });
+
                     // Update repair history
                     await DatabaseService.addReparationStatut({
                         reparation_id: rep.id!,
-                        statut_id: statusPaid.id!,
+                        statut_id: statusPaidId,
                         date_statut: new Date()
                     });
                 }
             }
 
-            // 2. Clear flags on the car
+            // 2. Create Payment Record (New)
+            await DatabaseService.createPaiement({
+                voiture_id: car.value.id,
+                montant: totalCost.value,
+                date_paiement: new Date()
+            });
+
+            // 3. Clear flags on the car (Notification)
             await DatabaseService.updateVoiture(car.value.id, {
                 toutFini: false
             });
 
-            alert('Paiement réussi !');
+            alert('Paiement réussi ! Merci de votre confiance.');
             router.replace('/home');
         } catch (e) {
             console.error("Payment error:", e);
             alert('Erreur lors du paiement.');
+            if (btn) btn.disabled = false;
         }
     }
 };

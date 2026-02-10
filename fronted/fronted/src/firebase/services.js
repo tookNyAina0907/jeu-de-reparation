@@ -31,6 +31,13 @@ export const userService = {
     create: (data) => addDocument("t_users", data),
     update: (id, data) => updateDocument("t_users", id, data),
     delete: (id) => deleteDocument("t_users", id),
+    getByInternalId: async (internalId) => {
+        const q = query(collection(db, "t_users"), where("id", "==", internalId));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) return null;
+        const doc = querySnapshot.docs[0];
+        return { id: doc.id, ...doc.data() };
+    },
 };
 
 export const loginUser = async (email, password) => {
@@ -124,6 +131,11 @@ export const statutService = {
  */
 export const reparationService = {
     getAll: () => getAllDocuments("t_reparation"),
+    getByVoiture: async (voitureId) => {
+        const q = query(collection(db, "t_reparation"), where("voiture_id", "==", voitureId));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    },
     create: async (data) => {
         const reparation = await addDocument("t_reparation", data);
         // Initialiser l'historique avec le statut "En attente" par défaut ou celui fourni

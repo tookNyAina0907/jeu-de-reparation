@@ -94,27 +94,32 @@ const loadCars = async () => {
              const typeDef = allTypes.find(t => t.id === rep.type_id);
              serviceName = typeDef ? `${typeDef.nom} — ${typeDef.prix} Ar` : "Réparation";
 
-             // Check status (history)
-             const history = await DatabaseService.getHistoryByReparation(rep.id || '');
-             if (history.length > 0) {
-                 // Sort by date
-                 history.sort((a, b) => new Date(b.date_statut).getTime() - new Date(a.date_statut).getTime());
-                 const lastStatus = history[0];
-                 
-                 // Fetch status name
-                 // We could cache stats, but let's fetch for now
+             // Check status
+             // 1. Try new direct field
+             if (rep.statut_id) {
                  const allStatuts = await DatabaseService.getAllStatuts();
-                 const statusDef = allStatuts.find(s => s.id === lastStatus.statut_id);
-                 
+                 const statusDef = allStatuts.find(s => s.id === rep.statut_id);
                  if (statusDef) {
                      status = statusDef.nom;
-                     // Map status to progress (Simplified logic)
-                     if (status === 'En attente') progress = 10;
-                     else if (status === 'En cours') progress = 50;
-                     else if (status === 'Terminé') progress = 100;
-                     else if (status === 'Payé') progress = 100;
+                 }
+             } 
+             // 2. Fallback to history (for old data)
+             else {
+                 const history = await DatabaseService.getHistoryByReparation(rep.id || '');
+                 if (history.length > 0) {
+                     history.sort((a, b) => new Date(b.date_statut).getTime() - new Date(a.date_statut).getTime());
+                     const lastStatus = history[0];
+                     const allStatuts = await DatabaseService.getAllStatuts();
+                     const statusDef = allStatuts.find(s => s.id === lastStatus.statut_id);
+                     if (statusDef) status = statusDef.nom;
                  }
              }
+
+             // Map status to progress (Simplified logic)
+             if (status === 'En attente') progress = 10;
+             else if (status === 'En cours') progress = 50;
+             else if (status === 'Terminé') progress = 100;
+             else if (status === 'Payé') progress = 100;
          }
 
          return {
@@ -153,7 +158,7 @@ const showCompletionAlert = async (car: any) => {
             {
                 text: 'Payer maintenant',
                 handler: () => {
-                    router.push('/client/payment/' + car.id);
+                    router.push('/payment/' + car.id);
                 }
             }
         ]
@@ -228,7 +233,8 @@ const setupSubscription = () => {
             };
         }));
 
-        cars.value = enhancedCars;
+        // Filter out cars where status is 'Payé'
+        cars.value = enhancedCars.filter(c => c.statusLabel !== 'Payé');
     });
 };
 

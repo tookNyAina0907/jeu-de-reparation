@@ -40,3 +40,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Routes pour le tableau de bord
     Route::get('/dashboard', [DashboardController::class, 'index']);
 });
+
+// Route de synchronisation Firebase (Publique pour l'instant car le front utilise Firebase Auth)
+Route::post('/sync', [\App\Http\Controllers\API\FirebaseController::class, 'sync']);

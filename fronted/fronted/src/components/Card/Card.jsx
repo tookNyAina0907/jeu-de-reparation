@@ -1,8 +1,8 @@
 import styles from './Card.module.scss';
 
-export function Card({ children, className = '', variant = 'default' }) {
+export function Card({ children, className = '', variant = 'default', ...props }) {
   return (
-    <div className={`${styles.card} ${styles[variant]} ${className}`.trim()}>
+    <div className={`${styles.card} ${styles[variant]} ${className}`.trim()} {...props}>
       {children}
     </div>
   );

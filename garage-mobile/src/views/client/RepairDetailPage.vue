@@ -85,13 +85,21 @@ onMounted(async () => {
     for (const rep of repairs) {
       const typeDef = allTypes.find(t => t.id === rep.type_id);
       
-      // Get last status from history
-      const history = await DatabaseService.getHistoryByReparation(rep.id || '');
       let statusName = 'En attente';
-      if (history.length > 0) {
-        history.sort((a, b) => new Date(b.date_statut).getTime() - new Date(a.date_statut).getTime());
-        const lastStatus = allStatuts.find(s => s.id === history[0].statut_id);
-        if (lastStatus) statusName = lastStatus.nom;
+      
+      // 1. Try new direct field
+      if (rep.statut_id) {
+         const statusDef = allStatuts.find(s => s.id === rep.statut_id);
+         if (statusDef) statusName = statusDef.nom;
+      }
+      // 2. Fallback to history
+      else {
+          const history = await DatabaseService.getHistoryByReparation(rep.id || '');
+          if (history.length > 0) {
+            history.sort((a, b) => new Date(b.date_statut).getTime() - new Date(a.date_statut).getTime());
+            const lastStatus = allStatuts.find(s => s.id === history[0].statut_id);
+            if (lastStatus) statusName = lastStatus.nom;
+          }
       }
 
       if (statusName.toLowerCase() === 'terminé' || statusName.toLowerCase() === 'payé') {

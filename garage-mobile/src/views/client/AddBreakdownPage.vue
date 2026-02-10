@@ -120,7 +120,7 @@ const submit = async () => {
                  if (statusEnAttente && statusEnAttente.id) {
                      await DatabaseService.addReparationStatut({
                          reparation_id: repId,
-                         statut_id: statusEnAttente.id,
+                         statut_id: statusEnAttente.id!,
                          date_statut: new Date()
                      });
                  }

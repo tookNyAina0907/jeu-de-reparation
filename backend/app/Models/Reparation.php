@@ -15,6 +15,7 @@ class Reparation extends Model
     protected $fillable = [
         'voiture_id',
         'type_id',
+        'statut_id',
     ];
 
     // Relation avec la voiture

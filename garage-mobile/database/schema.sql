@@ -38,8 +38,10 @@ CREATE TABLE t_reparation (
     id SERIAL PRIMARY KEY,
     voiture_id INTEGER NOT NULL,
     type_id INTEGER NOT NULL,
+    statut_id INTEGER, -- Dernier statut connu
     CONSTRAINT fk_reparation_voiture FOREIGN KEY (voiture_id) REFERENCES t_voiture(id) ON DELETE CASCADE,
-    CONSTRAINT fk_reparation_type FOREIGN KEY (type_id) REFERENCES t_type_interventions(id)
+    CONSTRAINT fk_reparation_type FOREIGN KEY (type_id) REFERENCES t_type_interventions(id),
+    CONSTRAINT fk_reparation_statut FOREIGN KEY (statut_id) REFERENCES t_statut(id)
 );
 
 -- 6. Table Suivi des Statuts (Historique)
@@ -60,3 +62,12 @@ INSERT INTO t_type_interventions (nom, description_interventions, prix, duree) V
 ('Vidange', 'Vidange complète avec changement de filtre', 50000, '01:00:00'),
 ('Freinage', 'Changement des plaquettes de frein', 30000, '02:00:00'),
 ('Moteur', 'Diagnostic et réparation moteur', 100000, '04:00:00');
+
+-- 7. Table Paiements
+CREATE TABLE t_paiement (
+    id SERIAL PRIMARY KEY,
+    voiture_id INTEGER NOT NULL,
+    montant DECIMAL(10, 2) NOT NULL,
+    date_paiement TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_paiement_voiture FOREIGN KEY (voiture_id) REFERENCES t_voiture(id) ON DELETE CASCADE
+);

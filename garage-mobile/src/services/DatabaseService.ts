@@ -17,7 +17,8 @@ import type {
     TypeIntervention,
     Statut,
     Reparation,
-    ReparationStatut
+    ReparationStatut,
+    Paiement
 } from '@/types/models';
 
 // Collection refs
@@ -27,6 +28,7 @@ const typesCol = collection(db, 't_type_interventions');
 const statutsCol = collection(db, 't_statut');
 const reparationsCol = collection(db, 't_reparation');
 const reparationsStatutCol = collection(db, 't_reparation_statut');
+const paiementsCol = collection(db, 't_paiement');
 
 export const DatabaseService = {
     // --- Users ---
@@ -150,6 +152,11 @@ export const DatabaseService = {
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reparation));
     },
 
+    async updateReparation(id: string, data: Partial<Reparation>): Promise<void> {
+        const docRef = doc(db, 't_reparation', id);
+        await updateDoc(docRef, data);
+    },
+
     async getAllReparations(): Promise<Reparation[]> {
         const snapshot = await getDocs(reparationsCol);
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Reparation));
@@ -163,11 +170,19 @@ export const DatabaseService = {
             date_statut: repStatut.date_statut || new Date()
         };
         const docRef = await addDoc(reparationsStatutCol, data);
+
+        // Update parent Reparation with new statut_id
+        if (repStatut.reparation_id) {
+            await this.updateReparation(repStatut.reparation_id, {
+                statut_id: repStatut.statut_id
+            });
+        }
+
         return docRef.id;
     },
 
     async getHistoryByReparation(reparationId: string): Promise<ReparationStatut[]> {
-        const q = query(reparationsStatutCol, where("reparations_id", "==", reparationId));
+        const q = query(reparationsStatutCol, where("reparation_id", "==", reparationId));
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map(doc => {
             const data = doc.data();
@@ -177,6 +192,12 @@ export const DatabaseService = {
                 date_statut: (data.date_statut as Timestamp).toDate()
             } as ReparationStatut;
         });
+    },
+
+    // --- Paiements ---
+    async createPaiement(paiement: Paiement): Promise<string> {
+        const docRef = await addDoc(paiementsCol, paiement);
+        return docRef.id;
     },
 
     // --- Seeding ---

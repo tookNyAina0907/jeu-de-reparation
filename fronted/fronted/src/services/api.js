@@ -219,28 +219,94 @@ export async function updateRepair(id, updates) {
 
 /** Obtenir l'historique des réparations d'un client */
 export async function getUserRepairHistory(userId) {
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
-  const token = localStorage.getItem('auth_token');
-  
   try {
-    const response = await fetch(`${API_BASE_URL}/users/${userId}/repair-history`, {
-      method: 'GET',
+    // 1. Récupérer les infos de l'utilisateur
+    let user = await userService.getById(userId);
+
+    // Si pas trouvé par ID de document, essayer par ID interne (cas des imports SQL)
+    if (!user) {
+      user = await userService.getByInternalId(userId);
+    }
+
+    if (!user) throw new Error("Utilisateur non trouvé");
+
+    // 2. Récupérer les voitures de l'utilisateur
+    const cars = await voitureService.getByUser(userId);
+
+    // 3. Récupérer les types d'interventions pour avoir les noms et prix
+    const types = await interventionTypeService.getAll();
+
+    // 4. Pour chaque voiture, récupérer ses réparations
+    let allRepairs = [];
+    for (const car of cars) {
+      const repairs = await reparationService.getByVoiture(car.id);
+
+      // Enrichir les réparations avec les détails
+      const enrichedRepairs = await Promise.all(repairs.map(async (r) => {
+        const type = types.find(t => t.id === r.type_id) || {};
+
+        // Récupérer l'historique des statuts pour avoit la date du dernier statut
+        const statusHistory = await reparationService.getHistory(r.id);
+        // Trier par date décroissante
+        statusHistory.sort((a, b) => new Date(b.date_statut) - new Date(a.date_statut));
+        const latestStatus = statusHistory[0];
+
+        return {
+          id: r.id,
+          type_intervention: type.nom || 'Intervention',
+          description: type.description_interventions || '',
+          prix: type.prix || 0,
+          date: latestStatus ? latestStatus.date_statut : (r.date || r.createdAt),
+          voiture: car.matricule || 'Sans plaque',
+          statut: r.statut_id
+        };
+      }));
+
+      allRepairs = [...allRepairs, ...enrichedRepairs];
+    }
+
+    // 5. Trier par date décroissante globale
+    allRepairs.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    return {
+      ok: true,
+      data: {
+        user: {
+          id: user.id,
+          nom: user.nom,
+          email: user.email,
+          contact: user.contact
+        },
+        repairs: allRepairs
+      }
+    };
+
+  } catch (error) {
+    console.error('Erreur getUserRepairHistory (Firebase):', error);
+    return { ok: false, error: error.message };
+  }
+}
+
+// Synchronisation
+export const syncDatabase = async () => {
+  try {
+    const response = await fetch('http://127.0.0.1:8000/api/sync', {
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
         'Accept': 'application/json'
       }
     });
 
     if (!response.ok) {
-      throw new Error('Erreur lors de la récupération de l\'historique');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `Erreur HTTP: ${response.status}`);
     }
 
-    const data = await response.json();
-    return { ok: true, data };
+    return await response.json();
   } catch (error) {
-    console.error('Erreur getUserRepairHistory:', error);
-    return { ok: false, error: error.message };
+    console.error("Erreur syncDatabase:", error);
+    throw error;
   }
-}
+};
 

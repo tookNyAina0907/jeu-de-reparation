@@ -12,6 +12,7 @@ export interface Voiture {
     matricule: string;
     modele: string;
     users_id: string; // Reference to User ID
+    toutFini?: boolean;
 }
 
 export interface TypeIntervention {
@@ -31,6 +32,7 @@ export interface Reparation {
     id?: string;
     voiture_id: string; // Reference to Voiture ID
     type_id: string; // Reference to TypeIntervention ID
+    statut_id?: string;
 }
 
 export interface ReparationStatut {
@@ -38,4 +40,11 @@ export interface ReparationStatut {
     reparation_id: string; // Reference to Reparation ID
     statut_id: string; // Reference to Statut ID
     date_statut: Date; // Timestamp
+}
+
+export interface Paiement {
+    id?: string;
+    voiture_id: string;
+    montant: number;
+    date_paiement: Date;
 }
