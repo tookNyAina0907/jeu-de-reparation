@@ -8,11 +8,6 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-<<<<<<< HEAD
-        $this->call([
-            StatutSeeder::class,
-            TypeInterventionSeeder::class,
-=======
         // Données initiales pour les statuts
         \App\Models\Statut::insert([
             ['nom' => 'En attente'],
@@ -41,7 +36,6 @@ class DatabaseSeeder extends Seeder
                 'prix' => 100000,
                 'duree' => '04:00:00'
             ],
->>>>>>> d0fb118 (Update project)
         ]);
     }
 }

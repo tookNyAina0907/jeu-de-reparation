@@ -34,7 +34,7 @@ CREATE TABLE t_statut (
 );
 
 -- 5. Table Réparations (Une intervention spécifique sur une voiture)
-CREATE TABLE t_reparations (
+CREATE TABLE t_reparation (
     id SERIAL PRIMARY KEY,
     voiture_id INTEGER NOT NULL,
     type_id INTEGER NOT NULL,
@@ -43,9 +43,9 @@ CREATE TABLE t_reparations (
 );
 
 -- 6. Table Suivi des Statuts (Historique)
-CREATE TABLE t_reparations_statut (
+CREATE TABLE t_reparation_statut (
     id SERIAL PRIMARY KEY,
-    reparations_id INTEGER NOT NULL,
+    reparation_id INTEGER NOT NULL,
     statut_id INTEGER NOT NULL,
     date_statut TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_suivi_reparation FOREIGN KEY (reparations_id) REFERENCES t_reparations(id) ON DELETE CASCADE,

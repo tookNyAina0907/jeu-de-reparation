@@ -24,15 +24,10 @@ class DashboardController extends Controller
         $nombreClients = User::count();
 
         // Compter le nombre de réparations en cours
-<<<<<<< HEAD
         $reparationsEnCours = Reparation::whereHas('reparationsStatuts', function($query) {
             $query->whereHas('statut', function($q) {
                 $q->whereIn('nom', ['En attente', 'En cours']);
             });
-=======
-        $reparationsEnCours = Reparation::whereHas('statut', function($query) {
-            $query->whereIn('nom', ['En attente', 'En cours']);
->>>>>>> d0fb118 (Update project)
         })->count();
 
         return response()->json([

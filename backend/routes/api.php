@@ -11,11 +11,11 @@ use Illuminate\Support\Facades\Route;
 
 // Routes d'authentification (publiques)
 Route::post('/signup', [AuthController::class, 'signup']);
-<<<<<<< HEAD
+
 Route::post('/login', [AuthController::class, 'login']);
-=======
+
 Route::post('/login', [AuthController::class, 'login'])->name('login');
->>>>>>> d0fb118 (Update project)
+
 
 // Routes protégées par authentification
 Route::middleware('auth:sanctum')->group(function () {
@@ -38,10 +38,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Routes pour les utilisateurs
     Route::get('/users', [UserController::class, 'index']);
-<<<<<<< HEAD
     Route::get('/users/{id}', [UserController::class, 'show']);
-=======
->>>>>>> d0fb118 (Update project)
 
     // Routes pour le tableau de bord
     Route::get('/dashboard', [DashboardController::class, 'index']);

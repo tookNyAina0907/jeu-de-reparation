@@ -16,24 +16,15 @@ class AuthController extends Controller
         // Valider les données
         $request->validate([
             'nom' => 'required|string|max:255',
-<<<<<<< HEAD
             'email' => 'required|string|email|max:255|unique:t_users',
             'motdepasse' => 'required|string|min:6',
-=======
-            'email' => 'required|string|email|max:255|unique:users',
-            'motDePasse' => 'required|string|min:6',
->>>>>>> d0fb118 (Update project)
         ]);
 
         // Créer l'utilisateur
         $user = User::create([
             'nom' => $request->nom,
             'email' => $request->email,
-<<<<<<< HEAD
             'motdepasse' => Hash::make($request->motdepasse),
-=======
-            'motDePasse' => Hash::make($request->motDePasse),
->>>>>>> d0fb118 (Update project)
         ]);
 
         // Créer un token
@@ -53,22 +44,14 @@ class AuthController extends Controller
         // Valider les données
         $request->validate([
             'email' => 'required|email',
-<<<<<<< HEAD
             'motdepasse' => 'required',
-=======
-            'motDePasse' => 'required',
->>>>>>> d0fb118 (Update project)
         ]);
 
         // Chercher l'utilisateur
         $user = User::where('email', $request->email)->first();
 
         // Vérifier le mot de passe
-<<<<<<< HEAD
         if (!$user || !Hash::check($request->motdepasse, $user->motdepasse)) {
-=======
-        if (!$user || !Hash::check($request->motDePasse, $user->motDePasse)) {
->>>>>>> d0fb118 (Update project)
             throw ValidationException::withMessages([
                 'email' => ['Les identifiants sont incorrects.'],
             ]);
@@ -102,3 +85,4 @@ class AuthController extends Controller
         return response()->json($request->user(), 200);
     }
 }
+
