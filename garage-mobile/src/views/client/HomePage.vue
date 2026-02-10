@@ -1,4 +1,4 @@
-<template>
+.<template>
   <ion-page>
     <ion-header class="ion-no-border">
       <ion-toolbar>
@@ -45,9 +45,21 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonFab, IonFabButton, IonIcon, onIonViewWillEnter } from '@ionic/vue';
+import { 
+    IonPage, 
+    IonHeader, 
+    IonToolbar, 
+    IonTitle, 
+    IonContent, 
+    IonFab, 
+    IonFabButton, 
+    IonIcon, 
+    onIonViewWillEnter, 
+    onIonViewDidLeave, 
+    alertController 
+} from '@ionic/vue';
 import { add } from 'ionicons/icons';
-import { ref } from 'vue';
+import { ref, onUnmounted } from 'vue';
 import { DatabaseService } from '@/services/DatabaseService';
 import { AuthService, authState } from '@/services/AuthService';
 import { useRouter } from 'vue-router';
@@ -120,8 +132,119 @@ const loadCars = async () => {
   }
 };
 
+let unsubscribe: any = null;
+
+const alertedCars = new Set<string>();
+
+const showCompletionAlert = async (car: any) => {
+    if (alertedCars.has(car.id)) return;
+    alertedCars.add(car.id);
+    
+    const alert = await alertController.create({
+        header: 'Réparations Terminées !',
+        subHeader: car.matricule,
+        message: `Toutes les réparations pour votre véhicule ${car.modele} sont finies. Vous pouvez maintenant procéder au paiement.`,
+        cssClass: 'garage-alert',
+        buttons: [
+            {
+                text: 'Plus tard',
+                role: 'cancel'
+            },
+            {
+                text: 'Payer maintenant',
+                handler: () => {
+                    router.push('/client/payment/' + car.id);
+                }
+            }
+        ]
+    });
+
+    await alert.present();
+};
+
+const setupSubscription = () => {
+    if (!authState.user) return;
+
+    if (unsubscribe) unsubscribe();
+
+    unsubscribe = DatabaseService.subscribeToUserVoitures(authState.user.uid, async (userCars) => {
+        // Enhance cars with repair details
+        const enhancedCars = await Promise.all(userCars.map(async (car) => {
+            const repairs = await DatabaseService.getReparationsByVoiture(car.id || '');
+            
+            let progress = 0;
+            let serviceName = "Aucune réparation";
+            let status = 'En ordre';
+
+            if (repairs.length > 0) {
+                const totalRepairs = repairs.length;
+                let completedRepairs = 0;
+
+                for (const rep of repairs) {
+                    const history = await DatabaseService.getHistoryByReparation(rep.id || '');
+                    if (history.length > 0) {
+                        history.sort((a, b) => new Date(b.date_statut).getTime() - new Date(a.date_statut).getTime());
+                        const lastStatus = history[0];
+                        const allStatuts = await DatabaseService.getAllStatuts();
+                        const statusDef = allStatuts.find(s => s.id === lastStatus.statut_id);
+                        
+                        if (statusDef) {
+                            const sName = statusDef.nom.toLowerCase();
+                            if (sName === 'terminé' || sName === 'payé') {
+                                completedRepairs++;
+                            }
+                        }
+                    }
+                }
+
+                progress = Math.round((completedRepairs / totalRepairs) * 100);
+
+                // For the label/display, still use the last repair's status
+                const lastRep = repairs[repairs.length - 1];
+                const allTypes = await DatabaseService.getAllTypesIntervention();
+                const typeDef = allTypes.find(t => t.id === lastRep.type_id);
+                serviceName = typeDef ? `${typeDef.nom} — ${typeDef.prix} Ar` : "Réparation";
+
+                const lastHistory = await DatabaseService.getHistoryByReparation(lastRep.id || '');
+                if (lastHistory.length > 0) {
+                    lastHistory.sort((a, b) => new Date(b.date_statut).getTime() - new Date(a.date_statut).getTime());
+                    const lastStatusDef = (await DatabaseService.getAllStatuts()).find(s => s.id === lastHistory[0].statut_id);
+                    if (lastStatusDef) status = lastStatusDef.nom;
+                }
+            }
+
+            // Notification logic: 
+            // Trigger if toutFini is true OR status is 'Terminé'
+            // and we haven't paid yet
+            if (((car as any).toutFini || status === 'Terminé' || status === 'terminé') && status !== 'Payé' && status !== 'payé') {
+                showCompletionAlert(car);
+            }
+
+            return {
+                ...car,
+                serviceDetail: serviceName,
+                progress: progress,
+                statusLabel: status
+            };
+        }));
+
+        cars.value = enhancedCars;
+    });
+};
+
 onIonViewWillEnter(() => {
-    loadCars();
+    setupSubscription();
+});
+
+onIonViewDidLeave(() => {
+    if (unsubscribe) {
+        unsubscribe();
+        unsubscribe = null;
+    }
+});
+
+onUnmounted(() => {
+    if (unsubscribe) unsubscribe();
 });
 </script>
 

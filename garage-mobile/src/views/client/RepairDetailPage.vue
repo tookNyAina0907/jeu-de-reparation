@@ -11,38 +11,40 @@
     <ion-content class="ion-padding" v-if="car">
       <ion-card>
         <ion-card-header>
-          <ion-card-subtitle>{{ car.licensePlate }}</ion-card-subtitle>
-          <ion-card-title>{{ car.model }}</ion-card-title>
+          <ion-card-subtitle>{{ car.matricule }}</ion-card-subtitle>
+          <ion-card-title>{{ car.modele }}</ion-card-title>
         </ion-card-header>
         <ion-card-content>
-          <p><strong>Status:</strong> {{ formatStatus(car.status) }}</p>
-          <p><strong>Description:</strong> {{ car.description }}</p>
           
-          <div class="progress-section" v-if="car.status === 'IN_PROGRESS' || car.status === 'DONE'">
+          <div class="progress-section">
             <ion-label>Progression globale</ion-label>
-            <ion-progress-bar :value="car.progress / 100" :color="getStatusColor(car.status)"></ion-progress-bar>
-            <p class="ion-text-end">{{ car.progress }}%</p>
+            <ion-progress-bar :value="overallProgress / 100" color="primary"></ion-progress-bar>
+            <p class="ion-text-end">{{ overallProgress }}%</p>
           </div>
 
           <ion-list>
-            <ion-list-header>Réparations</ion-list-header>
-            <ion-item v-for="repair in car.repairs" :key="repair">
-              <ion-icon slot="start" :icon="construct" color="medium"></ion-icon>
-              <ion-label>{{ repair }}</ion-label>
+            <ion-list-header>Interventions Prévues</ion-list-header>
+            <ion-item v-for="item in interventions" :key="item.id">
+              <ion-icon slot="start" :icon="getStatusIcon(item.status)" :color="getStatusColor(item.status)"></ion-icon>
+              <ion-label>
+                <h2>{{ item.name }}</h2>
+                <p>{{ item.price.toLocaleString() }} Ar</p>
+              </ion-label>
+              <ion-badge slot="end" :color="getStatusColor(item.status)">{{ item.status }}</ion-badge>
             </ion-item>
           </ion-list>
 
-          <div v-if="car.status === 'DONE'" class="payment-section">
-            <h3 class="ion-text-center">Total: {{ car.totalCost.toLocaleString() }} Ar</h3>
+          <div v-if="overallProgress === 100" class="payment-section">
+            <h3 class="ion-text-center">Total à payer: {{ totalCost.toLocaleString() }} Ar</h3>
             <ion-button expand="block" color="success" :router-link="'/payment/' + car.id">
-              Payer et Récupérer
+              Continuer vers le paiement
             </ion-button>
           </div>
 
-          <div v-if="car.status === 'PAID'" class="paid-section">
-            <ion-button expand="block" color="medium" disabled>
-              Déjà Payé
-            </ion-button>
+          <div v-if="interventions.some(i => i.status.toLowerCase() === 'payé')" class="paid-section">
+            <p class="ion-text-center ion-padding-top" style="color: var(--ion-color-success)">
+              <ion-icon :icon="checkmarkCircle"></ion-icon> Facture réglée
+            </p>
           </div>
 
         </ion-card-content>
@@ -52,37 +54,79 @@
 </template>
 
 <script setup lang="ts">
-import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonProgressBar, IonLabel, IonList, IonListHeader, IonItem, IonIcon, IonButton } from '@ionic/vue';
-import { construct } from 'ionicons/icons';
+import { IonPage, IonHeader, IonToolbar, IonTitle, IonContent, IonButtons, IonBackButton, IonCard, IonCardHeader, IonCardSubtitle, IonCardTitle, IonCardContent, IonProgressBar, IonLabel, IonList, IonListHeader, IonItem, IonIcon, IonButton, IonBadge } from '@ionic/vue';
+import { construct, checkmarkCircle, hourglass, playCircle } from 'ionicons/icons';
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { GarageService, Car } from '@/services/MockGarageService';
+import { DatabaseService } from '@/services/DatabaseService';
+import type { Voiture } from '@/types/models';
 
 const route = useRoute();
-const car = ref<Car | undefined>(undefined);
+const car = ref<Voiture | null>(null);
+const interventions = ref<any[]>([]);
+const totalCost = ref(0);
+const overallProgress = ref(0);
 
 onMounted(async () => {
-  const id = Number(route.params.id);
-  car.value = await GarageService.getCarById(id);
+  const id = route.params.id as string;
+  const voiture = await DatabaseService.getVoitureById(id);
+  
+  if (voiture) {
+    car.value = voiture;
+    
+    // Fetch all repairs
+    const repairs = await DatabaseService.getReparationsByVoiture(id);
+    const allTypes = await DatabaseService.getAllTypesIntervention();
+    const allStatuts = await DatabaseService.getAllStatuts();
+    
+    let completedCount = 0;
+    const details = [];
+
+    for (const rep of repairs) {
+      const typeDef = allTypes.find(t => t.id === rep.type_id);
+      
+      // Get last status from history
+      const history = await DatabaseService.getHistoryByReparation(rep.id || '');
+      let statusName = 'En attente';
+      if (history.length > 0) {
+        history.sort((a, b) => new Date(b.date_statut).getTime() - new Date(a.date_statut).getTime());
+        const lastStatus = allStatuts.find(s => s.id === history[0].statut_id);
+        if (lastStatus) statusName = lastStatus.nom;
+      }
+
+      if (statusName.toLowerCase() === 'terminé' || statusName.toLowerCase() === 'payé') {
+        completedCount++;
+      }
+
+      details.push({
+        id: rep.id,
+        name: typeDef?.nom || 'Intervention',
+        price: typeDef?.prix || 0,
+        status: statusName
+      });
+
+      totalCost.value += typeDef?.prix || 0;
+    }
+
+    interventions.value = details;
+    overallProgress.value = repairs.length > 0 ? Math.round((completedCount / repairs.length) * 100) : 0;
+  }
 });
 
-const getStatusColor = (status: string) => {
-  switch(status) {
-    case 'DONE': return 'success';
-    case 'IN_PROGRESS': return 'warning';
-    default: return 'primary';
-  }
+const getStatusIcon = (status: string) => {
+  const s = status.toLowerCase();
+  if (s === 'terminé' || s === 'payé') return checkmarkCircle;
+  if (s === 'en cours') return playCircle;
+  return hourglass;
 };
 
-const formatStatus = (status: string) => {
-    switch(status) {
-        case 'PENDING': return 'En attente';
-        case 'IN_PROGRESS': return 'En cours';
-        case 'DONE': return 'Terminé';
-        case 'PAID': return 'Payé';
-        default: return status;
-    }
-}
+const getStatusColor = (status: string) => {
+  const s = status.toLowerCase();
+  if (s === 'terminé' || s === 'payé') return 'success';
+  if (s === 'en cours') return 'warning';
+  return 'medium';
+};
+
 </script>
 
 <style scoped>

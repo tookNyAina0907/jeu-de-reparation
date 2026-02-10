@@ -18,10 +18,48 @@ import { db, auth } from "./config";
 
 // --- SERVICES D'AUTHENTIFICATION ---
 
+export const userService = {
+    getAll: () => getAllDocuments("t_users"),
+    getById: (id) => getDocumentById("t_users", id),
+    getByEmail: async (email) => {
+        const q = query(collection(db, "t_users"), where("email", "==", email));
+        const querySnapshot = await getDocs(q);
+        if (querySnapshot.empty) return null;
+        const resultDoc = querySnapshot.docs[0];
+        return { id: resultDoc.id, ...resultDoc.data() };
+    },
+    create: (data) => addDocument("t_users", data),
+    update: (id, data) => updateDocument("t_users", id, data),
+    delete: (id) => deleteDocument("t_users", id),
+};
+
 export const loginUser = async (email, password) => {
     try {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        return { ok: true, user: userCredential.user };
+        const user = userCredential.user;
+
+        console.log("Firebase Auth réussi pour:", user.email);
+
+        // On essaye de récupérer les données par Email
+        let userDoc = await userService.getByEmail(email);
+
+        // Si non trouvé, on essaye par UID (ID du document = UID Firebase Auth)
+        if (!userDoc) {
+            console.log("Doc non trouvé par email, essai par UID:", user.uid);
+            userDoc = await userService.getById(user.uid);
+        }
+
+        console.log("Données Firestore récupérées:", userDoc);
+
+        return {
+            ok: true,
+            user: {
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                ...(userDoc || {}) // On fusionne les données Firestore (nom, role, etc.)
+            }
+        };
     } catch (error) {
         console.error("Erreur de connexion:", error.message);
         return { ok: false, error: error.message };
@@ -49,17 +87,6 @@ export const registerUser = async (email, password) => {
 };
 
 // --- SERVICES SPECIFIQUES (Mappage SQL -> Firestore) ---
-
-/**
- * Gestion des Utilisateurs (t_users)
- */
-export const userService = {
-    getAll: () => getAllDocuments("t_users"),
-    getById: (id) => getDocumentById("t_users", id),
-    create: (data) => addDocument("t_users", data),
-    update: (id, data) => updateDocument("t_users", id, data),
-    delete: (id) => deleteDocument("t_users", id),
-};
 
 /**
  * Gestion des Voitures (t_voiture)
@@ -108,12 +135,37 @@ export const reparationService = {
         return reparation;
     },
     updateStatut: async (reparationId, newStatutId) => {
+        // 1. Mettre à jour le statut de la réparation
         await updateDocument("t_reparation", reparationId, { statut_id: newStatutId });
-        return await addDocument("t_reparations_statut", {
+        await addDocument("t_reparations_statut", {
             reparations_id: reparationId,
             statut_id: newStatutId,
             date_statut: new Date().toISOString()
         });
+
+        // 2. Si le statut est "Terminé", on vérifie si toutes les réparations de la voiture sont finies
+        if (newStatutId === "Terminé" || newStatutId === "terminé") {
+            const currentRep = await getDocumentById("t_reparation", reparationId);
+            if (currentRep && currentRep.voiture_id) {
+                const voitureId = currentRep.voiture_id;
+
+                // Récupérer toutes les réparations de cette voiture
+                const q = query(collection(db, "t_reparation"), where("voiture_id", "==", voitureId));
+                const snapshot = await getDocs(q);
+                const allReparations = snapshot.docs.map(doc => doc.data());
+
+                // Vérifier si elles sont toutes à "Terminé"
+                const allDone = allReparations.every(r => r.statut_id === "Terminé" || r.statut_id === "terminé" || r.statut_id === "Payé" || r.statut_id === "payé");
+
+                if (allDone) {
+                    // Mettre à jour la voiture pour la notification mobile
+                    await updateDocument("t_voiture", voitureId, { toutFini: true });
+                    console.log(`Toutes les réparations pour ${voitureId} sont finies. Flag toutFini activé.`);
+                }
+            }
+        }
+
+        return { ok: true };
     },
     getHistory: async (reparationId) => {
         const q = query(collection(db, "t_reparations_statut"), where("reparations_id", "==", reparationId));

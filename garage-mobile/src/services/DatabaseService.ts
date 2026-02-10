@@ -3,13 +3,13 @@ import {
     collection,
     addDoc,
     getDocs,
-    doc,
     getDoc,
+    doc,
     updateDoc,
-    deleteDoc,
     query,
     where,
-    Timestamp
+    Timestamp,
+    onSnapshot
 } from 'firebase/firestore';
 import type {
     User,
@@ -36,6 +36,7 @@ export const DatabaseService = {
         if (existing) {
             throw new Error(`User with email ${user.email} already exists`);
         }
+        user.role = 'client'; // Default role
         const docRef = await addDoc(usersCol, user);
         return docRef.id;
     },
@@ -55,6 +56,15 @@ export const DatabaseService = {
         return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
     },
 
+    async getUserById(id: string): Promise<User | null> {
+        const docRef = doc(db, 't_users', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as User;
+        }
+        return null;
+    },
+
     // --- Voitures ---
     async createVoiture(voiture: Voiture): Promise<string> {
         // Enforce Unique Matricule
@@ -68,10 +78,32 @@ export const DatabaseService = {
         return docRef.id;
     },
 
+    async getVoitureById(id: string): Promise<Voiture | null> {
+        const docRef = doc(db, 't_voiture', id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            return { id: docSnap.id, ...docSnap.data() } as Voiture;
+        }
+        return null;
+    },
+
+    async updateVoiture(id: string, data: Partial<Voiture>): Promise<void> {
+        const docRef = doc(db, 't_voiture', id);
+        await updateDoc(docRef, data);
+    },
+
     async getVoituresByUser(userId: string): Promise<Voiture[]> {
         const q = query(voituresCol, where("users_id", "==", userId));
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Voiture));
+    },
+
+    subscribeToUserVoitures(userId: string, callback: (voitures: Voiture[]) => void) {
+        const q = query(voituresCol, where("users_id", "==", userId));
+        return onSnapshot(q, (snapshot) => {
+            const voitures = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Voiture));
+            callback(voitures);
+        });
     },
 
     // --- Types Interventions ---
@@ -150,28 +182,28 @@ export const DatabaseService = {
     // --- Seeding ---
     async seedInitialData() {
         // Seed Statuts
-        const statuts = ['En attente', 'En cours', 'Terminé', 'Payé'];
-        for (const nom of statuts) {
-            const exists = await this.getStatutByName(nom);
-            if (!exists) {
-                await this.createStatut({ nom });
-                console.log(`Statut seeded: ${nom}`);
-            }
-        }
+        // const statuts = ['En attente', 'En cours', 'Terminé', 'Payé'];
+        // for (const nom of statuts) {
+        //     const exists = await this.getStatutByName(nom);
+        //     if (!exists) {
+        //         await this.createStatut({ nom });
+        //         console.log(`Statut seeded: ${nom}`);
+        //     }
+        // }
 
-        // Seed Types Interventions
-        const types = [
-            { nom: 'Vidange', description_interventions: 'Vidange complète avec changement de filtre', prix: 50000, duree: 60 },
-            { nom: 'Freinage', description_interventions: 'Changement des plaquettes de frein', prix: 30000, duree: 120 },
-            { nom: 'Moteur', description_interventions: 'Diagnostic et réparation moteur', prix: 100000, duree: 240 }
-        ];
+        // // Seed Types Interventions
+        // const types = [
+        //     { nom: 'Vidange', description_interventions: 'Vidange complète avec changement de filtre', prix: 50000, duree: 60 },
+        //     { nom: 'Freinage', description_interventions: 'Changement des plaquettes de frein', prix: 30000, duree: 120 },
+        //     { nom: 'Moteur', description_interventions: 'Diagnostic et réparation moteur', prix: 100000, duree: 240 }
+        // ];
 
-        const existingTypes = await this.getAllTypesIntervention();
-        if (existingTypes.length === 0) {
-            for (const t of types) {
-                await this.createTypeIntervention(t);
-                console.log(`Type seeded: ${t.nom}`);
-            }
-        }
+        // const existingTypes = await this.getAllTypesIntervention();
+        // if (existingTypes.length === 0) {
+        //     for (const t of types) {
+        //         await this.createTypeIntervention(t);
+        //         console.log(`Type seeded: ${t.nom}`);
+        //     }
+        // }
     }
 };

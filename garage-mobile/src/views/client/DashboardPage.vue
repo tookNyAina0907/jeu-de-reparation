@@ -66,13 +66,7 @@
       </div>
 
       <!-- Promo Banner -->
-      <div class="promo-banner garage-card">
-        <div class="promo-text">
-            <h4>OFFRE SPÉCIALE</h4>
-            <p> -20% sur la vidange ce mois-ci !</p>
-        </div>
-        <ion-icon :icon="gift" class="promo-icon"></ion-icon>
-      </div>
+
     </ion-content>
   </ion-page>
 </template>

@@ -17,6 +17,8 @@ services:
       DB_PASSWORD: tooknyaina
     networks:
       - app-network
+    ports:
+      - "8000:8000"
 
   db:
     image: postgres:15
@@ -35,6 +37,7 @@ services:
 
 volumes:
   pgdata:
+
 
 networks:
   app-network:

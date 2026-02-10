@@ -21,7 +21,12 @@ export function BackofficeLogin() {
     setLoading(true);
     const res = await login(loginValue, password);
     setLoading(false);
+    // setError(''+res.user.role); // On réinitialise l'erreur avant de traiter la réponse
     if (res.ok) {
+      if (res.user.role !== 'admin') {
+        setError('Accès refusé : compte administrateur requis.');
+        return;
+      }
       localStorage.setItem('garage_user', JSON.stringify(res.user));
       navigate('/backoffice/dashboard');
     } else {
@@ -104,7 +109,7 @@ export function BackofficeLogin() {
         </form>
 
         <p className={styles.hint}>
-          Démo : <code>admin</code> / <code>garage2025</code>
+          Démo : <code>took@gmail.com</code> / <code>123456</code>
         </p>
       </section>
     </div>
