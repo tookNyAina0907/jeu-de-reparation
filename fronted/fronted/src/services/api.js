@@ -76,10 +76,12 @@ export async function getClients() {
   return { data: vehicles };
 }
 
-/** Liste des utilisateurs bruts (t_users) */
-export async function getUsers() {
+/** Liste des utilisateurs filtrés par rôle (clients par défaut) */
+export async function getUsers(role = 'client') {
   const users = await userService.getAll();
-  return { data: users };
+  // Si role est null/undefined on retourne tout, sinon on filtre
+  const filtered = role ? users.filter(u => u.role === role || (!u.role && role === 'client')) : users;
+  return { data: filtered };
 }
 
 /** Réparations en cours — t_reparation */
@@ -214,3 +216,31 @@ export async function updateRepair(id, updates) {
   }
   return { ok: true };
 }
+
+/** Obtenir l'historique des réparations d'un client */
+export async function getUserRepairHistory(userId) {
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+  const token = localStorage.getItem('auth_token');
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/users/${userId}/repair-history`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+        'Accept': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de la récupération de l\'historique');
+    }
+
+    const data = await response.json();
+    return { ok: true, data };
+  } catch (error) {
+    console.error('Erreur getUserRepairHistory:', error);
+    return { ok: false, error: error.message };
+  }
+}
+

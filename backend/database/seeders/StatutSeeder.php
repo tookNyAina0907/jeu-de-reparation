@@ -12,13 +12,8 @@ class StatutSeeder extends Seeder
         $statuts = [
             ['nom' => 'En attente'],
             ['nom' => 'En cours'],
-<<<<<<< HEAD
             ['nom' => 'Terminé'],
             ['nom' => 'Payé'],
-=======
-            ['nom' => 'Terminée'],
-            ['nom' => 'Annulée'],
->>>>>>> d0fb118 (Update project)
         ];
 
         foreach ($statuts as $statut) {

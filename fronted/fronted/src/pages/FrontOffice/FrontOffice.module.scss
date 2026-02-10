@@ -56,6 +56,13 @@
 }
 
 .clientCard {
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba($orange, 0.15);
+  }
+
   .clientHeader {
     display: flex;
     justify-content: space-between;
@@ -68,6 +75,17 @@
     font-weight: 600;
     color: $orange;
     font-size: 1rem;
+  }
+
+  .historyIcon {
+    font-size: 1.2rem;
+    opacity: 0.6;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+
+  &:hover .historyIcon {
+    opacity: 1;
+    transform: scale(1.1);
   }
 
   .plaque {

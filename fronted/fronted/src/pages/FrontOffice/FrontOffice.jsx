@@ -3,6 +3,7 @@ import { getUsers, getClients, getRepairsInProgress, getWaitingSlot, getInterven
 import { Card, CardHeader } from '../../components/Card/Card';
 import { Button } from '../../components/Button/Button';
 import { ProgressBar } from '../../components/ProgressBar/ProgressBar';
+import { ClientHistoryModal } from '../../components/ClientHistoryModal/ClientHistoryModal';
 import styles from './FrontOffice.module.scss';
 
 const MAX_REPAIRS = 2;
@@ -19,9 +20,11 @@ export function FrontOffice() {
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
+  const [selectedClient, setSelectedClient] = useState(null);
+
   useEffect(() => {
     Promise.all([
-      getUsers().then((r) => setUsers(r.data)),
+      getUsers().then((r) => setUsers(r.data.filter(user => user.role !== 'admin'))),
       getClients().then((r) => setCarsList(r.data)),
       getRepairsInProgress().then((r) => setRepairs(r.data)),
       getWaitingSlot().then((r) => setWaiting(r.data)),
@@ -32,6 +35,14 @@ export function FrontOffice() {
   function handleRepairChange(e) {
     const { name, value } = e.target;
     setRepairForm((f) => ({ ...f, [name]: value }));
+  }
+
+  function handleClientClick(user) {
+    setSelectedClient(user);
+  }
+
+  function handleCloseModal() {
+    setSelectedClient(null);
   }
 
   async function handleSubmitRepair(e) {
@@ -120,16 +131,23 @@ export function FrontOffice() {
         {message && <p className={styles.message}>{message}</p>}
       </section>
 
-      <section className={styles.section} id="users">
-        <h2 className={styles.sectionTitle}>Utilisateurs</h2>
+      <section className={styles.section} id="clients">
+        <h2 className={styles.sectionTitle}>Clients</h2>
         <div className={styles.clients}>
           {users.length === 0 ? (
-            <Card className={styles.empty}>Aucun utilisateur enregistré.</Card>
+            <Card className={styles.empty}>Aucun client enregistré.</Card>
           ) : (
             users.map((u) => (
-              <Card key={u.id} variant="hud" className={styles.clientCard}>
+              <Card
+                key={u.id}
+                variant="hud"
+                className={styles.clientCard}
+                onClick={() => handleClientClick(u)}
+                style={{ cursor: 'pointer' }}
+              >
                 <div className={styles.clientHeader}>
                   <span className={styles.name}>{u.nom}</span>
+                  <span className={styles.historyIcon}>📋</span>
                 </div>
                 <p className={styles.vehicule}>{u.email}</p>
                 <p className={styles.tel}>{u.contact || 'Pas de contact'}</p>
@@ -195,6 +213,14 @@ export function FrontOffice() {
           )}
         </div>
       </section>
+
+      {selectedClient && (
+        <ClientHistoryModal
+          userId={selectedClient.id}
+          userName={selectedClient.nom}
+          onClose={handleCloseModal}
+        />
+      )}
     </div>
   );
 }

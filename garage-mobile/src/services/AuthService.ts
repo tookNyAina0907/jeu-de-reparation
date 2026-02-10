@@ -44,7 +44,8 @@ export const AuthService = {
                 nom: data.fullName,
                 email: data.email,
                 contact: data.contact,
-                motdepasse: data.password
+                motdepasse: data.password,
+                role: 'client'
             } as User);
 
             return true;

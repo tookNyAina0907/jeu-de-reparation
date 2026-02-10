@@ -4,6 +4,7 @@ export interface User {
     email: string;
     motdepasse?: string; // Recommended: Use Firebase Auth instead of storing passwords
     contact: string;
+    role?: string;
 }
 
 export interface Voiture {

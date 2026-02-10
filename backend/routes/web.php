@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-<<<<<<< HEAD
     return response()->json([
         'message' => '✅ Backend Laravel fonctionne correctement !',
         'version' => 'Laravel ' . app()->version(),
@@ -25,7 +24,4 @@ Route::get('/api/test', function () {
         'message' => 'L\'API fonctionne correctement !',
         'timestamp' => now()->toDateTimeString(),
     ]);
-=======
-    return ['message' => 'API Gestion Réparations Automobiles'];
->>>>>>> d0fb118 (Update project)
 });

@@ -17,10 +17,7 @@ export const seedDatabase = async () => {
 
         // 2. Seed des types d'interventions
         const interventions = [
-<<<<<<< HEAD
-=======
             { nom: 'Vidange', description_interventions: 'Vidange complète avec changement de filtre', prix: 50000, duree: '01:00:00' },
->>>>>>> d0fb118 (Update project)
             { nom: 'Freinage', description_interventions: 'Changement des plaquettes de frein', prix: 30000, duree: '02:00:00' },
             { nom: 'Moteur', description_interventions: 'Diagnostic et réparation moteur', prix: 100000, duree: '04:00:00' }
         ];
